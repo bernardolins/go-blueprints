@@ -45,6 +45,7 @@ var upgrader = &websocket.Upgrader{ReadBufferSize: socketBufferSize, WriteBuffer
 
 func (r *room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	socket, err := upgrader.Upgrade(w, req, nil)
+
 	if err != nil {
 		log.Fatal("ServeHTTP ", err)
 		return
@@ -60,4 +61,13 @@ func (r *room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	defer func() { r.leave <- client }()
 	go client.write()
 	client.read()
+}
+
+func newRoom() *room {
+	return &room{
+		foward:  make(chan []byte),
+		join:    make(chan *client),
+		leave:   make(chan *client),
+		clients: make(map[*client]bool),
+	}
 }
